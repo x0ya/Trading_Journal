@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Journal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <button onclick="showPage('dashboard')">Dashboard</button><!--onclick is a event listener executes showPage in js-->
+        <button onclick="showPage('log')">Log Trades</button>
+        <button onclick="showPage('history')">History</button>
+    </nav>
+
+    <main>
+        <div id="page-dashboard" class="page">
+            <h2>Dashboard</h2>
+        </div>
+        <div id="page-log" class="page">
+            <h2>Log a Trade</h2>
+
+            <form id="trade-form">
+
+                <div>
+                    <label>Symbol</label>
+                    <input type="text" id="f-symbol" placeholder="BTC, ETH, SOL...">
+                </div>
+
+                <div>
+                    <label>Type</label>
+                    <select id="f-type">
+                        <option value="Spot">Spot</option>
+                        <option value="Futures">Futures</option>
+                        <option value="Options">Options</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Direction</label>
+                    <select id="f-dir">
+                        <option value="Long">Long</option>
+                        <option value="Short">Short</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Entry Price</label>
+                    
+                </div>
+            </form>
+        </div>
+        <div id="page-history" class="page">
+            <h2>History</h2>
+        </div>
+    </main>
+
+
+    <script src="app.js"></script>
+</body>
+</html>
