@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Journal</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+    <nav>
+        <button onclick="showPage('dashboard')">Dashboard</button><!--onclick is a event listener executes showPage in js-->
+        <button onclick="showPage('log')">Log Trades</button>
+        <button onclick="showPage('history')">History</button>
+    </nav>
+
+    <main>
+        <div id="page-dashboard" class="page">
+            <h2>Dashboard</h2>
+
+            <div id="stats">
+                <div>
+                    <p>Total P&L</p>
+                    <p id="stat-pnl">$0</p>
+                </div>
+                <div>
+                    <p>Win Rate</p>
+                    <p id="stat-wr">0%</p>
+                </div>
+                <div>
+                    <p>Total Trades</p>
+                    <p id="stat-total">0</p>
+                </div>
+                <div>
+                    <p>Avg P&L</p>
+                    <p id="stat-avg">$0</p>
+                </div>
+            </div>
+
+            <h3>Equity Curve</h3>
+            <canvas id="chart-equity"></canvas>
+
+            <h3>P&L by Asset</h3>
+            <canvas id="chart-asset"></canvas>
+
+            <h3>Win / Loss</h3>
+            <canvas id="chart-winloss"></canvas>
+            
+        </div>
+
+
+        <div id="page-log" class="page">
+            <h2>Log a Trade</h2>
+
+            <form id="trade-form">
+
+                <div>
+                    <label for="f-symbol">Symbol</label>
+                    <input type="text" id="f-symbol" placeholder="BTC, ETH, SOL...">
+                </div>
+
+                <div>
+                    <label for="f-type">Type</label>
+                    <select id="f-type">
+                        <option value="Spot">Spot</option>
+                        <option value="Futures">Futures</option>
+                        <option value="Options">Options</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="f-direction">Direction</label>
+                    <select id="f-direction">
+                        <option value="Long">Long</option>
+                        <option value="Short">Short</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="f-entry">Entry Price</label>
+                    <input type="number" id="f-entry" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="f-exit">Exit Price</label>
+                    <input type="number" id="f-exit" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="f-size">Size</label>
+                    <input type="number" id="f-size" placeholder="0">
+                </div>
+
+                <div>
+                    <label for="f-date">Date & Time</label>
+                    <input type="datetime-local" id="f-date">
+                </div>
+
+                <div>
+                    <label for="f-notes">Notes</label>
+                    <textarea id="f-notes" placeholder="What went well? What to improve"></textarea>
+                </div>
+
+                <div>
+                    <label for="f-screenshot">Screenshot</label>
+                     <input type="file" id="f-screenshot" accept="image/*"><!--accept all type of images image/png, impg/ jpg-->
+                </div>
+
+                <button type="button" onclick="addTrade()">Save Trade</button>
+               
+            </form>
+        </div>
+
+
+        <div id="page-history" class="page">
+            <h2>History</h2>
+            <p id="history-empty">No trades yet. Log your first trade!</p>
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Direction</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>Size</th>
+                        <th>P&L</th>
+                        <th>Screenshot</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+
+    <script src="app.js"></script>
+</body>
+</html>
