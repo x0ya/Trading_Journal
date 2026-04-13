@@ -3,13 +3,13 @@ Helps you monitor your trades with entry, exits and screenshots
 
 # Screenshots
 ## Dashboard 1
-![Dashboard](Screenshots/Dashboard)
+![Dashboard](Screenshots/Dashboard_1)
 
 ## Dashboard 2
-![Dashboard](Screenshot/Dashboard2)
+![Dashboard](Screenshot/Dashboard_2)
 
 ## History
 ![History](Screenshot/History_page)
 
 ## Logging trade
-![Log](Screenshot/Log_page)
+![Log](Screenshot/Logs_page)
