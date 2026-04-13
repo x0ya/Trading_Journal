@@ -11,7 +11,7 @@ function showPage(pageName) {//showPage is called with the button eg showPage('d
     });
 
     // highlight active button
-    if (event && event.target){
+    if (event && event.target){//Was this function called by a button click? If yes go inside. If no — like when page loads automatically — skip this block.
         document.querySelectorAll('nav button').forEach(function(btn) {
             btn.classList.remove('active');
         });
