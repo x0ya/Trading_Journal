@@ -13,10 +13,10 @@ function showPage(pageName) {//showPage is called with the button eg showPage('d
     // highlight active button
     if (event && event.target){//Was this function called by a button click? If yes go inside. If no — like when page loads automatically — skip this block.
         document.querySelectorAll('nav button').forEach(function(btn) {
-            btn.classList.remove('active');
+            btn.classList.remove('active');//removes this class from all the element
         });
-        event.target.classList.add('active');
-    }
+        event.target.classList.add('active');//and adds this class on the target
+    }//browser creates an event and event.target is the element on which the event is triggered
 
     const target = document.getElementById('page-' + pageName);
     target.style.display = 'block';//('page-' + pageName); makes (page-dashboard) which is our id
