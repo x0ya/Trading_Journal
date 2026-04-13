@@ -3,6 +3,8 @@ const pages = document.querySelectorAll('.page');
 let trades = JSON.parse(localStorage.getItem('trades') || '[]'); // Convert them from string back to array. If nothing is saved yet, start with an empty array []
 let equityChartInstance = null; //these instances are created to store charts as without these instances the chart were piling up on each other
 let winlossChartInstance = null;
+
+
 function showPage(pageName) {//showPage is called with the button eg showPage('dashboard')
     pages.forEach(function(page) {
         page.style.display = 'none';//hide all the element
