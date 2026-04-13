@@ -6,10 +6,10 @@ Helps you monitor your trades with entry, exits and screenshots
 ![Dashboard](Screenshots/Dashboard.png)
 
 ## Dashboard 2
-![Dashboard](Screenshot/Dashboard_2.png)
+![Dashboard](Screenshots/Dashboard_2.png)
 
 ## History
-![History](Screenshot/History.png)
+![History](Screenshots/History.png)
 
 ## Logging trade
-![Log](Screenshot/Log.png)
+![Log](Screenshots/Log.png)
