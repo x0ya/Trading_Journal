@@ -3,4 +3,4 @@ Helps you monitor your trades with entry, exits and screenshots
 
 ## Screenshots
 # Dashboard
-![Dashboard](screenshots/Dashboard)
+![Dashboard](screenshots/History page)
