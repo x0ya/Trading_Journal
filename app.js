@@ -52,11 +52,8 @@ function addTrade() {
         screenshot
     };
 
-    console.log(trade);
-
     trades.push(trade);
     localStorage.setItem('trades', JSON.stringify(trades)); //local storage can only store strings so we convert it to string
-    console.log('All trades', trades);
     renderHistory(); //rebuild because a new trade was added
 
 
@@ -69,6 +66,12 @@ function addTrade() {
     document.getElementById('f-notes').value = '';
     document.getElementById('f-screenshot').value = '';
 
+    //alert
+    const msg = document.getElementById('f-success');
+    msg.classList.add('visible');
+    setTimeout(function(){
+        msg.classList.remove('visible');
+    }, 30000);
     renderStats();
     renderChart();
 

@@ -132,6 +132,17 @@ form button:hover {
     background-color: #00acc1;
 }
 
+#f-success {
+    grid-column: span 3;
+    color: #00bcd4;
+    font-size: 13px;
+    opacity: 0;
+}
+
+#f-success.visible {
+    opacity: 1;
+}
+
 /*History table*/
 #history-table {
     width: 100%;
