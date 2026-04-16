@@ -1,6 +1,8 @@
 //get all elements(divs) with class page
 const pages = document.querySelectorAll('.page');
-let trades = JSON.parse(localStorage.getItem('trades') || '[]'); // Convert them from string back to array. If nothing is saved yet, start with an empty array []
+const API = 'http://localhost:3000';
+let trades = [];
+// Convert them from string back to array. If nothing is saved yet, start with an empty array [] note: used to be let trades = JSON.parse(localStorage.getItem('trades') || '[]');
 let equityChartInstance = null; //these instances are created to store charts as without these instances the chart were piling up on each other
 let winlossChartInstance = null;
 
@@ -23,7 +25,7 @@ function showPage(pageName) {//showPage is called with the button eg showPage('d
 }
 showPage('dashboard');//homepage
 
-function addTrade() {
+async function addTrade() {
     const symbol = document.getElementById('f-symbol').value.trim().toUpperCase();
     const type = document.getElementById('f-type').value;
     const direction = document.getElementById('f-direction').value;
@@ -38,46 +40,94 @@ function addTrade() {
         return;
     }
 
-   getScreenshot().then(function (screenshot) {//. then passes the result to the screenshot para
-        const trade = {
-        id: Date.now(),
-        symbol,
-        type,
-        direction,
-        entry,
-        exit,
-        size,
-        date,
-        notes,
-        screenshot
-    };
+    const screenshot = await getScreenshot();
 
-    trades.push(trade);
-    localStorage.setItem('trades', JSON.stringify(trades)); //local storage can only store strings so we convert it to string
-    renderHistory(); //rebuild because a new trade was added
+    try {
+        const res = await fetch(`${API}/trades`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({symbol, type, direction, entry, exit, size, date, notes, screenshot})
+        });
+
+        if(!res.ok) {
+            const err = await res.json();
+            alert('Erro: ' + err.error);
+            return;
+        }
+
+        const newTrade = await res.json();
+        trades.unshift(newTrade);
+        renderHistory();
+        renderStats();
+        renderChart();
+
+        document.getElementById('f-symbol').value = '';
+        document.getElementById('f-entry').value = '';
+        document.getElementById('f-exit').value = '';
+        document.getElementById('f-size').value = '';
+        document.getElementById('f-date').value = '';
+        document.getElementById('f-notes').value = '';
+        document.getElementById('f-screenshot').value = '';
+
+        const msg = document.getElementById('f-success');
+        msg.classList.add('visible');
+        setTimeout(function(){
+            msg.classList.remove('visible');
+        }, 3000);
+    } catch(err) {
+        console.error('Failed to save trade: ', err);
+        alert('Could not connect to server');
+    }
+
+//    getScreenshot().then(function (screenshot) {//. then passes the result to the screenshot para
+//         const trade = {
+//         id: Date.now(),
+//         symbol,
+//         type,
+//         direction,
+//         entry,
+//         exit,
+//         size,
+//         date,
+//         notes,
+//         screenshot
+//     };
+
+//     trades.push(trade);
+//     localStorage.setItem('trades', JSON.stringify(trades)); //local storage can only store strings so we convert it to string
+//     renderHistory(); //rebuild because a new trade was added
 
 
-    //clear form after saving
-    document.getElementById('f-symbol').value = '';
-    document.getElementById('f-entry').value = '';
-    document.getElementById('f-exit').value = '';
-    document.getElementById('f-size').value = '';
-    document.getElementById('f-date').value = '';
-    document.getElementById('f-notes').value = '';
-    document.getElementById('f-screenshot').value = '';
+//     //clear form after saving
+//     document.getElementById('f-symbol').value = '';
+//     document.getElementById('f-entry').value = '';
+//     document.getElementById('f-exit').value = '';
+//     document.getElementById('f-size').value = '';
+//     document.getElementById('f-date').value = '';
+//     document.getElementById('f-notes').value = '';
+//     document.getElementById('f-screenshot').value = '';
 
-    //alert
-    const msg = document.getElementById('f-success');
-    msg.classList.add('visible');
-    setTimeout(function(){
-        msg.classList.remove('visible');
-    }, 30000);
-    renderStats();
-    renderChart();
+//     //alert
+//     const msg = document.getElementById('f-success');
+//     msg.classList.add('visible');
+//     setTimeout(function(){
+//         msg.classList.remove('visible');
+//     }, 30000);
+//     renderStats();
+//     renderChart();
 
-   });
+//    });
 
     
+}
+
+//calculate pnl
+function calculatePnl(trade){
+    if(trade.direction.toLowerCase() === "long") {
+        return (trade.exit - trade.entry) * trade.size;
+    }else{
+        return (trade.entry - trade.exit) * trade.size;
+    }
 }
 
 //redering history on page
@@ -97,7 +147,7 @@ function renderHistory() {
     
     trades.forEach(function(trade) {
         const formattedDate = new Date(trade.date).toLocaleString();//formates the date to a nicer format
-        const pnl = (trade.exit - trade.entry) * trade.size;
+        const pnl = calculatePnl(trade);
         const win = pnl >= 0;
         //here backticks are used. backtics are used for writing strings eg `hello ${name}`.inside ${} code is considered as js and outside its string
         const row = `
@@ -120,14 +170,27 @@ function renderHistory() {
 
 //delete function
 //this creates the completely new array without the id which its called upon
-function deleteTrade(id){                                       //Takes the id
-    trades = trades.filter(function (trade) {
-        return trade.id !== id;                                 //returns all trades without the matching id
-    });
-    localStorage.setItem('trades', JSON.stringify(trades));     //updates the table
-    renderHistory();                                            //renders the updated table
-    renderStats();
-    renderChart();
+async function deleteTrade(id){   
+    try{
+        await fetch(`${API}/trades/${id}`, {method: 'DELETE'});
+        trades = trades.filter(function(trade) {
+            return trade.id !== id;
+        });
+        renderHistory();
+        renderStats();
+        renderChart();
+    } catch (err) {
+        console.error('Failed to delete trade: ', err);
+        alert('Could not connect to server.');
+    }
+    //Takes the id
+    // trades = trades.filter(function (trade) {
+    //     return trade.id !== id;                                 //returns all trades without the matching id
+    // });
+    // localStorage.setItem('trades', JSON.stringify(trades));     //updates the table
+    // renderHistory();                                            //renders the updated table
+    // renderStats();
+    // renderChart();
 }
 
 //adding ss
@@ -165,7 +228,7 @@ function renderStats() {
     if (trades.length === 0) return;// if no trades return
 
     const pnls = trades.map(function(trade) {
-        return (trade.exit - trade.entry) * trade.size;
+        return calculatePnl(trade);
     });
 
     const totalPnl = pnls.reduce(function(sum, pnl) {
@@ -198,7 +261,7 @@ function renderChart() {
     
     let cumulative = 0;
     const equityData = sorted.map(function(trade) {
-        const pnl = (trade.exit - trade.entry) * trade.size;
+        const pnl = calculatePnl(trade);
         cumulative += pnl;
         return cumulative;
     });//if we don't use cm the array will retrun only pnl and when we use it its shows actual increment and decrement
@@ -230,7 +293,7 @@ function renderChart() {
 
     //Win and loss
     const wins = trades.filter(function(trade) {
-        return (trade.exit - trade.entry) * trade.size >= 0;
+        return calculatePnl(trade) >= 0;
     }).length;//Stores the length of wining trade
 
     const losses = trades.length - wins;//substracts the wins from total
@@ -256,6 +319,20 @@ function renderChart() {
 }
 
 
-renderHistory();//rednders table on startup. rebuild on page load to show saved trades
-renderStats();
-renderChart();
+// renderHistory();//rednders table on startup. rebuild on page load to show saved trades
+// renderStats();
+// renderChart();
+
+async function loadTrades() {
+    try {
+        const res = await fetch(`${API}/trades`);
+        trades = await res.json();
+        renderHistory();
+        renderStats();
+        renderChart();
+    } catch (err) {
+        console.error('Failed to load trades: ', err);
+    }
+}
+
+loadTrades();
