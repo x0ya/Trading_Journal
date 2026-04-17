@@ -1,8 +1,6 @@
 //get all elements(divs) with class page
 const pages = document.querySelectorAll('.page');
-const API = 'http://localhost:3000';
-let trades = [];
-// Convert them from string back to array. If nothing is saved yet, start with an empty array [] note: used to be let trades = JSON.parse(localStorage.getItem('trades') || '[]');
+let trades = JSON.parse(localStorage.getItem('trades') || '[]'); // Convert them from string back to array. If nothing is saved yet, start with an empty array []
 let equityChartInstance = null; //these instances are created to store charts as without these instances the chart were piling up on each other
 let winlossChartInstance = null;
 
@@ -25,7 +23,7 @@ function showPage(pageName) {//showPage is called with the button eg showPage('d
 }
 showPage('dashboard');//homepage
 
-async function addTrade() {
+function addTrade() {
     const symbol = document.getElementById('f-symbol').value.trim().toUpperCase();
     const type = document.getElementById('f-type').value;
     const direction = document.getElementById('f-direction').value;
@@ -40,94 +38,46 @@ async function addTrade() {
         return;
     }
 
-    const screenshot = await getScreenshot();
+   getScreenshot().then(function (screenshot) {//. then passes the result to the screenshot para
+        const trade = {
+        id: Date.now(),
+        symbol,
+        type,
+        direction,
+        entry,
+        exit,
+        size,
+        date,
+        notes,
+        screenshot
+    };
 
-    try {
-        const res = await fetch(`${API}/trades`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({symbol, type, direction, entry, exit, size, date, notes, screenshot})
-        });
-
-        if(!res.ok) {
-            const err = await res.json();
-            alert('Erro: ' + err.error);
-            return;
-        }
-
-        const newTrade = await res.json();
-        trades.unshift(newTrade);
-        renderHistory();
-        renderStats();
-        renderChart();
-
-        document.getElementById('f-symbol').value = '';
-        document.getElementById('f-entry').value = '';
-        document.getElementById('f-exit').value = '';
-        document.getElementById('f-size').value = '';
-        document.getElementById('f-date').value = '';
-        document.getElementById('f-notes').value = '';
-        document.getElementById('f-screenshot').value = '';
-
-        const msg = document.getElementById('f-success');
-        msg.classList.add('visible');
-        setTimeout(function(){
-            msg.classList.remove('visible');
-        }, 3000);
-    } catch(err) {
-        console.error('Failed to save trade: ', err);
-        alert('Could not connect to server');
-    }
-
-//    getScreenshot().then(function (screenshot) {//. then passes the result to the screenshot para
-//         const trade = {
-//         id: Date.now(),
-//         symbol,
-//         type,
-//         direction,
-//         entry,
-//         exit,
-//         size,
-//         date,
-//         notes,
-//         screenshot
-//     };
-
-//     trades.push(trade);
-//     localStorage.setItem('trades', JSON.stringify(trades)); //local storage can only store strings so we convert it to string
-//     renderHistory(); //rebuild because a new trade was added
+    trades.push(trade);
+    localStorage.setItem('trades', JSON.stringify(trades)); //local storage can only store strings so we convert it to string
+    renderHistory(); //rebuild because a new trade was added
 
 
-//     //clear form after saving
-//     document.getElementById('f-symbol').value = '';
-//     document.getElementById('f-entry').value = '';
-//     document.getElementById('f-exit').value = '';
-//     document.getElementById('f-size').value = '';
-//     document.getElementById('f-date').value = '';
-//     document.getElementById('f-notes').value = '';
-//     document.getElementById('f-screenshot').value = '';
+    //clear form after saving
+    document.getElementById('f-symbol').value = '';
+    document.getElementById('f-entry').value = '';
+    document.getElementById('f-exit').value = '';
+    document.getElementById('f-size').value = '';
+    document.getElementById('f-date').value = '';
+    document.getElementById('f-notes').value = '';
+    document.getElementById('f-screenshot').value = '';
 
-//     //alert
-//     const msg = document.getElementById('f-success');
-//     msg.classList.add('visible');
-//     setTimeout(function(){
-//         msg.classList.remove('visible');
-//     }, 30000);
-//     renderStats();
-//     renderChart();
+    //alert
+    const msg = document.getElementById('f-success');
+    msg.classList.add('visible');
+    setTimeout(function(){
+        msg.classList.remove('visible');
+    }, 30000);
+    renderStats();
+    renderChart();
 
-//    });
+   });
 
     
-}
-
-//calculate pnl
-function calculatePnl(trade){
-    if(trade.direction.toLowerCase() === "long") {
-        return (trade.exit - trade.entry) * trade.size;
-    }else{
-        return (trade.entry - trade.exit) * trade.size;
-    }
 }
 
 //redering history on page
@@ -170,27 +120,14 @@ function renderHistory() {
 
 //delete function
 //this creates the completely new array without the id which its called upon
-async function deleteTrade(id){   
-    try{
-        await fetch(`${API}/trades/${id}`, {method: 'DELETE'});
-        trades = trades.filter(function(trade) {
-            return trade.id !== id;
-        });
-        renderHistory();
-        renderStats();
-        renderChart();
-    } catch (err) {
-        console.error('Failed to delete trade: ', err);
-        alert('Could not connect to server.');
-    }
-    //Takes the id
-    // trades = trades.filter(function (trade) {
-    //     return trade.id !== id;                                 //returns all trades without the matching id
-    // });
-    // localStorage.setItem('trades', JSON.stringify(trades));     //updates the table
-    // renderHistory();                                            //renders the updated table
-    // renderStats();
-    // renderChart();
+function deleteTrade(id){                                       //Takes the id
+    trades = trades.filter(function (trade) {
+        return trade.id !== id;                                 //returns all trades without the matching id
+    });
+    localStorage.setItem('trades', JSON.stringify(trades));     //updates the table
+    renderHistory();                                            //renders the updated table
+    renderStats();
+    renderChart();
 }
 
 //adding ss
@@ -318,21 +255,14 @@ function renderChart() {
     });
 }
 
-
-// renderHistory();//rednders table on startup. rebuild on page load to show saved trades
-// renderStats();
-// renderChart();
-
-async function loadTrades() {
-    try {
-        const res = await fetch(`${API}/trades`);
-        trades = await res.json();
-        renderHistory();
-        renderStats();
-        renderChart();
-    } catch (err) {
-        console.error('Failed to load trades: ', err);
+//calculate pnl
+function calculatePnl(trade){
+    if(trade.direction.toLowerCase() === 'long'){
+        return (trade.exit - trade.entry) * trade.size;
+    }else{
+        return (trade.entry - trade.exit) * trade.size;
     }
 }
-
-loadTrades();
+renderHistory();//rednders table on startup. rebuild on page load to show saved trades
+renderStats();
+renderChart();
